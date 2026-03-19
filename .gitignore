@@ -1,0 +1,54 @@
+# ─── Python Virtual Environments ──────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env.bak
+
+# ─── Python Cache & Bytecode ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ─── Python Eggs & Build Artifacts ────────────────────────────────────────────
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ─── Environment Variables ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── IDE / Editor Files ───────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Node / Frontend ──────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+
+# ─── OS Files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Uploads / User Data ──────────────────────────────────────────────────────
+uploads/*
+!uploads/.gitkeep
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
