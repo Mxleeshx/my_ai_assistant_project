@@ -14,6 +14,53 @@ router = APIRouter(prefix="/api")
 class RenameSessionRequest(BaseModel):
     title: str
 
+
+def _resequence_sessions(db: Session):
+    """Renumber chat_sessions IDs from 1 upward and update chat_histories
+    foreign keys to match, then reset the AUTO_INCREMENT counter.
+    Call this after any session deletion to keep IDs gap-free."""
+    from sqlalchemy import text
+
+    db.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
+
+    sessions = db.query(models.ChatSession).order_by(models.ChatSession.id).all()
+
+    # Pass 1: assign temporary negative IDs to avoid PK collisions during renumber
+    for i, session in enumerate(sessions, start=1):
+        if session.id != i:
+            db.execute(
+                text("UPDATE chat_histories SET session_id = :neg WHERE session_id = :old"),
+                {"neg": -(i), "old": session.id},
+            )
+            db.execute(
+                text("UPDATE chat_sessions SET id = :neg WHERE id = :old"),
+                {"neg": -(i), "old": session.id},
+            )
+
+    db.flush()
+
+    # Pass 2: flip negative IDs to the final positive values
+    for i, session in enumerate(sessions, start=1):
+        neg = -(i)
+        db.execute(
+            text("UPDATE chat_histories SET session_id = :pos WHERE session_id = :neg"),
+            {"pos": i, "neg": neg},
+        )
+        db.execute(
+            text("UPDATE chat_sessions SET id = :pos WHERE id = :neg"),
+            {"pos": i, "neg": neg},
+        )
+
+    db.flush()
+
+    # Reset AUTO_INCREMENT so the next insert follows on cleanly
+    next_id = len(sessions) + 1
+    db.execute(text(f"ALTER TABLE chat_sessions AUTO_INCREMENT = {next_id}"))
+    db.execute(text("ALTER TABLE chat_histories AUTO_INCREMENT = 1"))
+
+    db.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
+    db.commit()
+
 @router.get("/")
 def read_root():
     return {"message": "Welcome to the AI Chat Assistant API!"}
@@ -163,6 +210,8 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Session not found")
     db.delete(session)
     db.commit()
+    # Renumber remaining sessions so IDs stay sequential (no gaps)
+    _resequence_sessions(db)
     return {"status": "deleted"}
 
 
@@ -170,4 +219,6 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
 def clear_all_history(db: Session = Depends(get_db)):
     db.query(models.ChatSession).filter(models.ChatSession.user_id == 1).delete()
     db.commit()
+    # After wiping all sessions, reset both counters back to 1
+    _resequence_sessions(db)
     return {"status": "cleared"}
