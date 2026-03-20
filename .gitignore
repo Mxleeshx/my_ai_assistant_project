@@ -1,4 +1,6 @@
 # ─── Python Virtual Environments ──────────────────────────────────────────────
+backend/.venv/
+backend/venv/
 .venv/
 venv/
 env/
@@ -46,8 +48,8 @@ Thumbs.db
 desktop.ini
 
 # ─── Uploads / User Data ──────────────────────────────────────────────────────
-uploads/*
-!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # ─── Logs ─────────────────────────────────────────────────────────────────────
 *.log

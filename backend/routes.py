@@ -9,6 +9,11 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
+# Resolve the uploads directory relative to this file so it always points to
+# backend/uploads/ regardless of which directory uvicorn is started from.
+UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+
 router = APIRouter(prefix="/api")
 
 class RenameSessionRequest(BaseModel):
@@ -135,7 +140,7 @@ async def chat(
         # Save file to disk
         ext = file.filename.split('.')[-1] if '.' in file.filename else ''
         filename = f"{uuid.uuid4().hex}.{ext}" if ext else uuid.uuid4().hex
-        saved_file_path = os.path.join("uploads", filename)
+        saved_file_path = os.path.join(UPLOADS_DIR, filename)
         
         with open(saved_file_path, "wb") as f:
             f.write(file_bytes)
