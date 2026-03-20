@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 
 const UserAvatar = () => (
     <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center shrink-0">
@@ -13,6 +14,26 @@ const AIAvatar = () => (
         ✦
     </div>
 );
+
+// Custom components to style every markdown element neatly
+const markdownComponents = {
+    p:      ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+    strong: ({ children }) => <strong className="font-semibold text-gray-900 dark:text-white">{children}</strong>,
+    em:     ({ children }) => <em className="italic text-gray-700 dark:text-gray-300">{children}</em>,
+    h1:     ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3 text-gray-900 dark:text-white">{children}</h1>,
+    h2:     ({ children }) => <h2 className="text-base font-bold mb-2 mt-3 text-gray-900 dark:text-white">{children}</h2>,
+    h3:     ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2 text-gray-900 dark:text-white">{children}</h3>,
+    ul:     ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1 pl-2">{children}</ul>,
+    ol:     ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1 pl-2">{children}</ol>,
+    li:     ({ children }) => <li className="leading-relaxed">{children}</li>,
+    code:   ({ inline, children }) =>
+        inline
+            ? <code className="bg-gray-100 dark:bg-gray-800 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>
+            : <pre className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 mb-2 overflow-x-auto"><code className="text-xs font-mono text-gray-800 dark:text-gray-200">{children}</code></pre>,
+    blockquote: ({ children }) => <blockquote className="border-l-4 border-violet-400 pl-3 my-2 text-gray-600 dark:text-gray-400 italic">{children}</blockquote>,
+    hr:     () => <hr className="my-3 border-gray-200 dark:border-gray-700" />,
+    a:      ({ href, children }) => <a href={href} target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline hover:opacity-80">{children}</a>,
+};
 
 export default function MessageBubble({ text, isUser, document_name }) {
     if (isUser) {
@@ -38,8 +59,11 @@ export default function MessageBubble({ text, isUser, document_name }) {
         <div className="flex items-start gap-3 py-1.5">
             <AIAvatar />
             <div className="max-w-[80%] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{text}</p>
+                <div className="text-sm text-gray-800 dark:text-gray-200">
+                    <ReactMarkdown components={markdownComponents}>{text}</ReactMarkdown>
+                </div>
             </div>
         </div>
     );
 }
+
